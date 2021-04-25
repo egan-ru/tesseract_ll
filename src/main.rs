@@ -8,9 +8,9 @@ type b8 = bool;
 
 #[allow(dead_code)]
 struct klle_test {
-	data : *mut u8,             /* data pointer */
 	next : *mut klle_test,      /* next member pointer */
 	prev : *mut klle_test,      /* next member pointer */
+	data : *mut u8,             /* data pointer */
 }
 
 type klle_test_t = klle_test;
@@ -46,7 +46,9 @@ let mut test_elem9 : klle_test_t;
 fn main()
 {
     let mut test_nurse : klle_test_t;
-    klle::init(&mut test_nurse, "nurse_txt");
+    let tnp : *mut klle_test_t = &mut test_nurse;
+    klle::init(tnp, "nurse_txt");
+
 
 
     println!("Hello, world!");
