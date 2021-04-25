@@ -27,12 +27,12 @@ type b8 = bool;
 /**
  * kernel linked list element
  */
-struct klle_<T> {
-	next : *mut klle_<T>,  		/* next member pointer */
-	prev : *mut klle_<T>,		/* next member pointer */
-	data : T,		            /* data */
+struct klle_<'a, T> {
+	next : &'a mut klle_<'a, T>,  		/* next member pointer */
+	prev : &'a mut klle_<'a, T>,		/* next member pointer */
+	data : T,		                    /* data */
 }
-pub type klle_t<T> = klle_<T>;
+pub type klle_t<'a, T> = klle_<'a, T>;
 
 /* functions */
 
@@ -42,7 +42,7 @@ pub type klle_t<T> = klle_<T>;
  * @param dts		- [in] data to set
  */
 #[inline(always)]
-pub unsafe fn init<T>(elem : &mut klle_t<T>, dts : T)
+pub unsafe fn init<'a, T>(elem : &'a mut klle_t<'a, T>, dts : T)
 {
     (*elem).next = elem;
 	(*elem).prev = elem;
@@ -56,7 +56,7 @@ pub unsafe fn init<T>(elem : &mut klle_t<T>, dts : T)
  * @return 	        - true if empty
  */
 #[inline(always)]
-pub unsafe fn is_empty<T>(nurse : &mut klle_t<T>)->b8
+pub unsafe fn is_empty<'a, T>(nurse : &'a mut klle_t<'a, T>)->b8
 {
     let result : b8 = (*nurse).next == nurse;
     return result;
@@ -68,7 +68,7 @@ pub unsafe fn is_empty<T>(nurse : &mut klle_t<T>)->b8
  * @param data 		- [in] data to add
  */
 #[inline(always)]
-pub unsafe fn addh<T>(nurse : &mut klle_t<T>, new_head : &mut klle_t<T>)
+pub unsafe fn addh<'a, T>(nurse : &'a mut klle_t<'a, T>, new_head : &'a mut klle_t<'a, T>)
 {
 	/*
 	 * circullar linked list have rules:
@@ -85,7 +85,7 @@ pub unsafe fn addh<T>(nurse : &mut klle_t<T>, new_head : &mut klle_t<T>)
 	/*	         /	    \/	   \			*/
 	/*	nurse --->      ---> old_head		*/
 	/************************************************/
-	let old_head : *mut klle_t<T> = (*nurse).next;
+	let old_head : &mut klle_t<'a, T> = (*nurse).next;
 
 	(*new_head).next = old_head;
 	(*new_head).prev = nurse;
@@ -99,7 +99,7 @@ pub unsafe fn addh<T>(nurse : &mut klle_t<T>, new_head : &mut klle_t<T>)
  * @param data 		- [inout] data to add
  */
 #[inline(always)]
-pub unsafe fn addt<T>(nurse : &mut klle_t<T>, new_tail : &mut klle_t<T>)
+pub unsafe fn addt<'a, T>(nurse : &'a mut klle_t<'a, T>, new_tail : &'a mut klle_t<'a, T>)
 {
 	/*
 	 * circullar linked list have rules:
@@ -116,7 +116,7 @@ pub unsafe fn addt<T>(nurse : &mut klle_t<T>, new_tail : &mut klle_t<T>)
 	/*	     /	    \/	   \			            */
 	/*    old_tail --->      ---> nurse		        */
 	/************************************************/
-	let old_tail : *mut klle_t<T> = (*nurse).prev;
+	let old_tail : &'a mut klle_t<'a, T> = (*nurse).prev;
 
 	(*new_tail).next = nurse;
 	(*new_tail).prev = old_tail;
@@ -133,7 +133,7 @@ pub unsafe fn addt<T>(nurse : &mut klle_t<T>, new_tail : &mut klle_t<T>)
  * 			          or nurse if linked list is empty
  */
 #[inline(always)]
-pub unsafe fn geth<T>(nurse : &mut klle_t<T>)->&mut klle_t<T>
+pub unsafe fn geth<'a, T>(nurse : &'a mut klle_t<'a, T>)->&'a mut klle_t<'a, T>
 {
 	/*
 	 * circullar linked list have rules:
@@ -152,7 +152,7 @@ pub unsafe fn geth<T>(nurse : &mut klle_t<T>)->&mut klle_t<T>
 	/*	     	    \/				                */
 	/*      prev <--- old_head ---> next		    */
 	/************************************************/
-	let old_head : *mut klle_t<T> = (*nurse).next;
+	let old_head : &'a mut klle_t<'a, T> = (*nurse).next;
 
 	(*nurse).next = (*old_head).next;
 	(*(*old_head).next).prev = nurse;
@@ -169,7 +169,7 @@ pub unsafe fn geth<T>(nurse : &mut klle_t<T>)->&mut klle_t<T>
  * 			          or nurse if linked list is empty
  */
 #[inline(always)]
-pub unsafe fn gett<T>(nurse : *mut klle_t<T>)->&mut klle_t<T>
+pub unsafe fn gett<'a, T>(nurse : &'a mut klle_t<'a, T>)->&'a mut klle_t<'a, T>
 {
 	/*
 	 * circullar linked list have rules:
@@ -188,7 +188,7 @@ pub unsafe fn gett<T>(nurse : *mut klle_t<T>)->&mut klle_t<T>
 	/*	     	    \/				                */
 	/*      prev <--- old_tail ---> next		    */
 	/************************************************/
-	let old_tail : *mut klle_t<T> = (*nurse).prev;
+	let old_tail : &'a mut klle_t<'a, T> = (*nurse).prev;
 
 	(*nurse).prev = (*old_tail).prev;
 	(*(*old_tail).prev).next = nurse;
@@ -202,7 +202,7 @@ pub unsafe fn gett<T>(nurse : *mut klle_t<T>)->&mut klle_t<T>
  * @param del 		- [inout] data to del
  */
 #[inline(always)]
-pub unsafe fn del<T>(del: *mut klle_t<T>)
+pub unsafe fn del<'a, T>(del: &'a mut klle_t<'a, T>)
 {
 	/*
 	 * circullar linked list have rules:
@@ -214,12 +214,12 @@ pub unsafe fn del<T>(del: *mut klle_t<T>)
 	 */
 
 	/************************************************/
-	/*	del.prev --->       ---> del.next	*/
-	/*	 \  \next------||----------/   /	*/
-	/*	  \------------||---------prev/		*/
-	/*                     ||			*/
-	/*	     	       \/			*/
-	/*		       del 			*/
+	/*	del.prev --->       ---> del.next	        */
+	/*	 \  \next------||----------/   /	        */
+	/*	  \------------||---------prev/		        */
+	/*                 ||       			        */
+	/*	     	       \/		        	        */
+	/*  		       del 			                */
 	/************************************************/
 	(*(*del).prev).next = (*del).next;
 	(*(*del).next).prev = (*del).prev;
