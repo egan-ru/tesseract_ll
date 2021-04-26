@@ -1,5 +1,6 @@
 #![allow(non_camel_case_types)]
 
+use core::mem::MaybeUninit;
 mod klle;
 
 /*
@@ -45,7 +46,7 @@ let mut test_elem9 : klle_test_t;
 
 */
 
-static mut nurse : klle::klle_t<&str> = 0;
+static mut nurse : Option<klle::klle_t<&str>> = None;
 
 fn main()
 {
@@ -61,3 +62,4 @@ fn main()
     println!("Hello, world!");
     
 }
+
