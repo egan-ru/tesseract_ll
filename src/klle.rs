@@ -20,6 +20,7 @@
  */
 
 #![allow(non_camel_case_types)]
+#![no_std]
 
 /* arch-part */
 type b8 = bool;
@@ -30,7 +31,7 @@ type b8 = bool;
 pub struct klle<T> {
 	next : *mut klle<T>,  		/* next member pointer */
 	prev : *mut klle<T>,		/* next member pointer */
-	data : T,	            /* data */
+	data : T,	                /* data */
 }
 pub type klle_t<T> = klle<T>;
 
@@ -49,11 +50,9 @@ impl <T> klle_t<T> {
     #[allow(dead_code)]
     pub unsafe fn init(&mut self, dts : T)
     {
-        let rself = self as *mut klle_t<T>;
-
-        (*rself).next = rself;
-	    (*rself).prev = rself;
-	    (*rself).data = dts;
+        (*self).next = self;
+	    (*self).prev = self;
+	    (*self).data = dts;
     }
 
     /**
@@ -66,8 +65,7 @@ impl <T> klle_t<T> {
     #[allow(dead_code)]
     pub unsafe fn is_empty(&mut self)->b8
     {
-        let rself = self as *mut klle_t<T>;
-        let result : b8 = (*rself).next == rself;
+        let result : b8 = (*self).next == self as *mut klle_t<T>;
         return result;
     }
 
@@ -80,13 +78,12 @@ impl <T> klle_t<T> {
     #[allow(dead_code)]
     pub unsafe fn addh(&mut self, new_head : *mut klle_t<T>)
     {
-        let rself = self as *mut klle_t<T>;
-	    let old_head : *mut klle_t<T> = (*rself).next;
+	    let old_head : *mut klle_t<T> = (*self).next;
 
 	    (*new_head).next = old_head;
-	    (*new_head).prev = rself;
+	    (*new_head).prev = self;
 	    (*old_head).prev = new_head;
-	    (*rself).next = new_head;
+	    (*self).next = new_head;
     }
 
     /**
@@ -98,13 +95,12 @@ impl <T> klle_t<T> {
     #[allow(dead_code)]
     pub unsafe fn addt(&mut self, new_tail : *mut klle_t<T>)
     {
-        let rself = self as *mut klle_t<T>;
-	    let old_tail : *mut klle_t<T> = (*rself).prev;
+	    let old_tail : *mut klle_t<T> = (*self).prev;
 
-	    (*new_tail).next = rself;
+	    (*new_tail).next = self;
 	    (*new_tail).prev = old_tail;
 	    (*old_tail).next = new_tail;
-	    (*rself).prev = new_tail;
+	    (*self).prev = new_tail;
     }
 
     /**
@@ -119,11 +115,10 @@ impl <T> klle_t<T> {
     #[allow(dead_code)]
     pub unsafe fn geth(&mut self)->*mut klle_t<T>
     {
-        let rself = self as *mut klle_t<T>;
-	    let old_head : *mut klle_t<T> = (*rself).next;
+	    let old_head : *mut klle_t<T> = (*self).next;
 
-	    (*rself).next = (*old_head).next;
-	    (*(*old_head).next).prev = rself;
+	    (*self).next = (*old_head).next;
+	    (*(*old_head).next).prev = self;
 
 	    return old_head;
     }
@@ -140,11 +135,10 @@ impl <T> klle_t<T> {
     #[allow(dead_code)]
     pub unsafe fn gett(&mut self)->*mut klle_t<T>
     {
-        let rself = self as *mut klle_t<T>;
-	    let old_tail : *mut klle_t<T> = (*rself).prev;
+	    let old_tail : *mut klle_t<T> = (*self).prev;
 
-	    (*rself).prev = (*old_tail).prev;
-	    (*(*old_tail).prev).next = rself;
+	    (*self).prev = (*old_tail).prev;
+	    (*(*old_tail).prev).next = self;
 
 	    return old_tail;
     }
@@ -158,9 +152,8 @@ impl <T> klle_t<T> {
     #[allow(dead_code)]
     pub unsafe fn del(&mut self)
     {
-        let rself = self as *mut klle_t<T>;
-	    (*(*rself).prev).next = (*rself).next;
-	    (*(*rself).next).prev = (*rself).prev;
+	    (*(*self).prev).next = (*self).next;
+	    (*(*self).next).prev = (*self).prev;
     }
 
 }

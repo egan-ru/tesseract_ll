@@ -1,7 +1,6 @@
 #![allow(non_camel_case_types)]
-
-use core::mem::MaybeUninit;
 mod klle;
+use klle::*;
 
 /*
 #[allow(dead_code)]
@@ -46,7 +45,15 @@ let mut test_elem9 : klle_test_t;
 
 */
 
-static mut nurse : Option<klle::klle_t<&str>> = None;
+use core::mem::MaybeUninit;
+
+pub type klle_str_t = klle_t<*mut str>;
+
+//static mut nurse : klle_t<&str> = {next : 0 as klle_t<&str>, prev : 0 as klle_t<&str>, data: 0 as &str};
+//static mut nurse : klle_str_t = MaybeUninit::zeroed();
+
+
+static mut nurse : klle_str_t = MaybeUninit::<klle_str_t>::uninit();
 
 fn main()
 {
@@ -56,7 +63,7 @@ fn main()
      * klle::init(tnp, "nurse_txt");
      */
 
-    nurse.init("nurse"); 
+    //nurse.init("nurse"); 
 
 
     println!("Hello, world!");
