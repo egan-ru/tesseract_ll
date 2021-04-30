@@ -20,7 +20,7 @@
  */
 
 #![allow(non_camel_case_types)]
-#![no_std]
+//#![no_std]
 
 /* arch-part */
 type b8 = bool;
@@ -31,7 +31,7 @@ type b8 = bool;
 pub struct klle<T> {
 	next : *mut klle<T>,  		/* next member pointer */
 	prev : *mut klle<T>,		/* next member pointer */
-	data : T,	                /* data */
+	pub data : T,	                /* data */
 }
 pub type klle_t<T> = klle<T>;
 

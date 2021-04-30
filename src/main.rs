@@ -1,59 +1,18 @@
 #![allow(non_camel_case_types)]
 mod klle;
 use klle::*;
+use core::mem::*;
 
-/*
-#[allow(dead_code)]
-struct klle_test {
-	next : *mut klle_test,      /* next member pointer */
-	prev : *mut klle_test,      /* next member pointer */
-	data : *mut u8,             /* data pointer */
-}
-*/
+/* redefined type for testing */
+pub type klle_str_t = klle_t<*const str>;
 
-/* type klle_test_t = klle_test; */
 
-/*
-const nurse_txt : u8[] = "!nurse";
-const m0_txt : u8[] = "0";
-const m1_txt : u8[] = "1";
-const m2_txt : u8[] = "2";
-const m3_txt : u8[] = "3";
-const m4_txt : u8[] = "4";
-const m5_txt : u8[] = "5";
-const m6_txt : u8[] = "6";
-const m7_txt : u8[] = "7";
-const m8_txt : u8[] = "8";
-const m9_txt : u8[] = "9";
-*/
+/* nurse is sentinel for test list */
+static mut NURSE : MaybeUninit<klle_str_t> = MaybeUninit::uninit();
 
 
 
-/* test elemts, every element is in one pos for easy debugging */
-/*
-let mut test_nurse : klle_test_t;
-let mut test_elem0 : klle_test_t;
-let mut test_elem1 : klle_test_t;
-let mut test_elem2 : klle_test_t;
-let mut test_elem3 : klle_test_t;
-let mut test_elem4 : klle_test_t;
-let mut test_elem5 : klle_test_t;
-let mut test_elem6 : klle_test_t;
-let mut test_elem7 : klle_test_t;
-let mut test_elem8 : klle_test_t;
-let mut test_elem9 : klle_test_t;
-
-*/
-
-use core::mem::MaybeUninit;
-
-pub type klle_str_t = klle_t<*mut str>;
-
-//static mut nurse : klle_t<&str> = {next : 0 as klle_t<&str>, prev : 0 as klle_t<&str>, data: 0 as &str};
-//static mut nurse : klle_str_t = MaybeUninit::zeroed();
-
-
-static mut nurse : klle_str_t = MaybeUninit::<klle_str_t>::uninit();
+//static mut nurse : klle_str_t = MaybeUninit::<klle_str_t>::uninit();
 
 fn main()
 {
@@ -62,9 +21,15 @@ fn main()
      * let tnp : *mut klle_test_t = &mut test_nurse;
      * klle::init(tnp, "nurse_txt");
      */
+    unsafe {
+        let nurse_ptr : *mut klle_str_t = NURSE.as_mut_ptr();
+        (*nurse_ptr).init("nurse!"); 
+    }
 
-    //nurse.init("nurse"); 
-
+    unsafe {
+        let nurse_ptr : *mut klle_str_t = NURSE.as_mut_ptr();
+        println!("{:?}",(*nurse_ptr).data);
+    }
 
     println!("Hello, world!");
     
