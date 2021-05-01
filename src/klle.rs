@@ -29,8 +29,8 @@ type b8 = bool;
  * kernel linked list element
  */
 pub struct klle<T> {
-	next : *mut klle<T>,  		/* next member pointer */
-	prev : *mut klle<T>,		/* next member pointer */
+	pub next : *mut klle<T>,  		/* next member pointer */
+	pub prev : *mut klle<T>,		/* next member pointer */
 	pub data : T,	                /* data */
 }
 pub type klle_t<T> = klle<T>;
