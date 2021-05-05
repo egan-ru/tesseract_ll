@@ -21,19 +21,27 @@
 
 #![allow(non_camel_case_types)]
 //#![no_std]
+use core::mem::*;
 
 /* arch-part */
 type b8 = bool;
 
-/**
- * kernel linked list element
- */
+/* kernel linked list element */
 pub struct klle<T> {
 	pub next : *mut klle<T>,  		/* next member pointer */
 	pub prev : *mut klle<T>,		/* next member pointer */
 	pub data : T,	                /* data */
 }
-pub type klle_t<T> = klle<T>;
+
+/* kernel linked list element,
+ * with possibilily usage with
+ * statically allocated mem
+ */
+pub struct klleu<T> {
+    pub ll: MaybeUninit<klle<T>>,   /* unused wrapper for klle */
+}
+
+pub type klle_t<T> = klleu<T>;
 
 /* functions */
 
@@ -50,9 +58,11 @@ impl <T> klle_t<T> {
     #[allow(dead_code)]
     pub unsafe fn init(&mut self, dts : T)
     {
-        (*self).next = self;
-	    (*self).prev = self;
-	    (*self).data = dts;
+        let ll : *mut klle<T> = (*self).ll.as_mut_ptr();
+
+        (*ll).next = ll;
+	    (*ll).prev = ll;
+	    (*ll).data = dts;
     }
 
     /**
@@ -65,7 +75,9 @@ impl <T> klle_t<T> {
     #[allow(dead_code)]
     pub unsafe fn is_empty(&mut self)->b8
     {
-        let result : b8 = (*self).next == self as *mut klle_t<T>;
+        let ll : *mut klle<T> = (*self).ll.as_mut_ptr();
+
+        let result : b8 = (*ll).next == ll;
         return result;
     }
 
@@ -78,12 +90,14 @@ impl <T> klle_t<T> {
     #[allow(dead_code)]
     pub unsafe fn addh(&mut self, new_head : *mut klle_t<T>)
     {
-	    let old_head : *mut klle_t<T> = (*self).next;
+        let ll : *mut klle<T> = (*self).ll.as_mut_ptr();
+        let nhead : *mut klle<T> = (*new_head).ll.as_mut_ptr();
+	    let ohead : *mut klle<T> = (*ll).next;
 
-	    (*new_head).next = old_head;
-	    (*new_head).prev = self;
-	    (*old_head).prev = new_head;
-	    (*self).next = new_head;
+	    (*nhead).next = ohead;
+	    (*nhead).prev = ll;
+	    (*ohead).prev = nhead;
+	    (*ll).next = nhead;
     }
 
     /**
@@ -95,12 +109,14 @@ impl <T> klle_t<T> {
     #[allow(dead_code)]
     pub unsafe fn addt(&mut self, new_tail : *mut klle_t<T>)
     {
-	    let old_tail : *mut klle_t<T> = (*self).prev;
+        let ll : *mut klle<T> = (*self).ll.as_mut_ptr();
+        let ntail : *mut klle<T> = (*new_tail).ll.as_mut_ptr();
+	    let otail : *mut klle<T> = (*ll).prev;
 
-	    (*new_tail).next = self;
-	    (*new_tail).prev = old_tail;
-	    (*old_tail).next = new_tail;
-	    (*self).prev = new_tail;
+	    (*ntail).next = ll;
+	    (*ntail).prev = otail;
+	    (*otail).next = ntail;
+	    (*ll).prev = ntail;
     }
 
     /**
@@ -115,12 +131,13 @@ impl <T> klle_t<T> {
     #[allow(dead_code)]
     pub unsafe fn geth(&mut self)->*mut klle_t<T>
     {
-	    let old_head : *mut klle_t<T> = (*self).next;
+        let ll : *mut klle<T> = (*self).ll.as_mut_ptr();
+	    let ohead : *mut klle<T> = (*ll).next;
 
-	    (*self).next = (*old_head).next;
-	    (*(*old_head).next).prev = self;
+	    (*ll).next = (*ohead).next;
+	    (*(*ohead).next).prev = ll;
 
-	    return old_head;
+	    return ohead as *mut klle_t<T>;
     }
 
     /**
@@ -135,12 +152,13 @@ impl <T> klle_t<T> {
     #[allow(dead_code)]
     pub unsafe fn gett(&mut self)->*mut klle_t<T>
     {
-	    let old_tail : *mut klle_t<T> = (*self).prev;
+        let ll : *mut klle<T> = (*self).ll.as_mut_ptr();
+	    let otail : *mut klle<T> = (*ll).prev;
 
-	    (*self).prev = (*old_tail).prev;
-	    (*(*old_tail).prev).next = self;
+	    (*ll).prev = (*otail).prev;
+	    (*(*otail).prev).next = ll;
 
-	    return old_tail;
+	    return otail as *mut klle_t<T>;
     }
 
     /**
@@ -152,8 +170,21 @@ impl <T> klle_t<T> {
     #[allow(dead_code)]
     pub unsafe fn del(&mut self)
     {
-	    (*(*self).prev).next = (*self).next;
-	    (*(*self).next).prev = (*self).prev;
+        let ll : *mut klle<T> = (*self).ll.as_mut_ptr();
+
+	    (*(*ll).prev).next = (*ll).next;
+	    (*(*ll).next).prev = (*ll).prev;
+    }
+
+    /**
+     * create list entry in uninitialized state
+     * @return      - uninitialized list entry
+     */ 
+    #[inline(always)]
+    #[allow(dead_code)]
+    pub const fn uninit()->klle_t<T>
+    {
+        return klle_t{ll: MaybeUninit::uninit()};
     }
 
 }
