@@ -187,5 +187,43 @@ impl <T> klle_t<T> {
         return klle_t{ll: MaybeUninit::uninit()};
     }
 
+    /**
+     * return pointer to next linked list node
+     * @return      - next linked list node
+     */ 
+    #[inline(always)]
+    #[allow(dead_code)]
+    pub unsafe fn next(&mut self)->*mut klle_t<T>
+    {
+        let ll : *mut klle<T> = (*self).ll.as_mut_ptr();
+        let next : *mut klle<T> = (*ll).next;
+        return next as *mut klle_t<T>;
+    }
+
+    /**
+     * return pointer to prev linked list node
+     * @return      - prev linked list node
+     */ 
+    #[inline(always)]
+    #[allow(dead_code)]
+    pub unsafe fn prev(&mut self)->*mut klle_t<T>
+    {
+        let ll : *mut klle<T> = (*self).ll.as_mut_ptr();
+        let prev : *mut klle<T> = (*ll).prev;
+        return prev as *mut klle_t<T>;
+    }
+
+    /**
+     * return linked list data
+     * @return      - linked list data
+     */ 
+    #[inline(always)]
+    #[allow(dead_code)]
+    pub unsafe fn data(&mut self)->&mut T
+    {
+        let ll : *mut klle<T> = (*self).ll.as_mut_ptr();
+        let datap : &mut T = &mut(*ll).data;
+        return datap;
+    }
 }
 
